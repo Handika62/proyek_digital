@@ -159,3 +159,61 @@ def menu_listrik():
     else:
         print("❌ Nama tidak ditemukan!")
     input("\nTekan Enter...")
+# 1. Database Bisnis
+def init_db_bisnis():
+    conn = sqlite3.connect('data/layanan.db')
+    cursor = conn.cursor()
+    # Tabel Bisnis (Pompa & Cleaning)
+    cursor.execute('''CREATE TABLE IF NOT EXISTS bisnis 
+                      (id INTEGER PRIMARY KEY, pelanggan TEXT, jasa TEXT, harga REAL, tgl TEXT)''')
+    conn.commit()
+    conn.close()
+
+# 2. Fitur Layanan Bisnis
+def menu_bisnis():
+    while True:
+        os.system('clear')
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("   🏢 MANAJEMEN BISNIS SAYA  ")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("1. Service Pompa Air")
+        print("2. Professional Cleaning Service")
+        print("3. Cek Laporan Penghasilan")
+        print("4. Kembali ke Menu RW")
+        
+        pilih = input("\nPilih layanan: ")
+        
+        if pilih in ['1', '2']:
+            jasa = "Service Pompa" if pilih == '1' else "Cleaning Service"
+            nama = input("Nama Pelanggan: ")
+            harga = float(input("Harga Jasa (Rp): "))
+            tgl = datetime.now().strftime("%Y-%m-%d %H:%M")
+            
+            conn = sqlite3.connect('data/layanan.db')
+            conn.execute("INSERT INTO bisnis (pelanggan, jasa, harga, tgl) VALUES (?, ?, ?, ?)", 
+                         (nama, jasa, harga, tgl))
+            conn.commit()
+            
+            # Kirim Notifikasi WA ke HP Anda sendiri sebagai owner
+            pesan = f"Order Masuk!\nLayanan: {jasa}\nPelanggan: {nama}\nTotal: Rp{harga:,.0f}"
+            kirim_wa("6281234567890", pesan) # Ganti dengan nomor WA Anda
+            
+            print(f"✅ Order {jasa} berhasil dicatat!")
+            input("\nTekan Enter...")
+            
+        elif pilih == '3':
+            print("\n--- LAPORAN KEUANGAN ---")
+            conn = sqlite3.connect('data/layanan.db')
+            total = 0
+            for r in conn.execute("SELECT pelanggan, jasa, harga FROM bisnis"):
+                print(f"- {r[0]} | {r[1]} | Rp{r[2]:,.0f}")
+                total += r[2]
+            print(f"\n💰 TOTAL PENDAPATAN: Rp{total:,.0f}")
+            input("\nTekan Enter...")
+        elif pilih == '4':
+            break
+
+# 3. Update Menu Utama (Tambahkan Opsi Menu Bisnis)
+# Di dalam def main(), tambahkan:
+# print("5. Menu Bisnis (Service Pompa/Cleaning)")
+# if pilihan == '5': menu_bisnis()
