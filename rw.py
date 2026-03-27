@@ -93,7 +93,9 @@ def menu_listrik():
 
 # 5. Menu Utama
 def main():
+    def main():
     init_db()
+    init_db_bisnis() # Tambahkan ini agar database bisnis siap
     while True:
         os.system('clear')
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -103,19 +105,16 @@ def main():
         print("2. Layanan Listrik")
         print("3. Cek Status Semua")
         print("4. Keluar")
+        print("5. Menu Bisnis (Service Pompa/Cleaning)") # Tambahkan baris ini
         
         pilih = input("\nPilih menu: ")
         if pilih == '1': menu_sampah()
         elif pilih == '2': menu_listrik()
         elif pilih == '3':
-            print("\n--- STATUS TERBARU ---")
-            conn = sqlite3.connect('data/layanan.db')
-            print("[LISTRIK]")
-            for r in conn.execute("SELECT warga, layanan, status FROM listrik"): print(f"- {r[0]}: {r[1]} ({r[2]})")
-            print("\n[SAMPAH]")
-            for r in conn.execute("SELECT warga, laporan FROM sampah"): print(f"- {r[0]}: {r[1]}")
+            # ... kode status ...
             input("\nKembali...")
         elif pilih == '4': break
+        elif pilih == '5': menu_bisnis() # Tambahkan baris ini
 
 if __name__ == "__main__":
     main()
@@ -217,3 +216,36 @@ def menu_bisnis():
 # Di dalam def main(), tambahkan:
 # print("5. Menu Bisnis (Service Pompa/Cleaning)")
 # if pilihan == '5': menu_bisnis()
+# 1. Fungsi Generate Nota Digital
+def buat_nota(pelanggan, jasa, harga):
+    nama_file = f"nota_{pelanggan.replace(' ', '_')}_{datetime.now().strftime('%d%m%y_%H%M')}.txt"
+    folder_nota = "nota_bisnis/"
+    
+    if not os.path.exists(folder_nota):
+        os.makedirs(folder_nota)
+    
+    path_nota = os.path.join(folder_nota, nama_file)
+    
+    garis = "=" * 35
+    isi_nota = f"""
+{garis}
+       BUKTI LAYANAN DIGITAL
+{garis}
+Tanggal   : {datetime.now().strftime('%Y-%m-%d %H:%M')}
+Pelanggan : {pelanggan}
+Layanan   : {jasa}
+Total     : Rp{harga:,.0f}
+{garis}
+      TERIMA KASIH TELAH
+    MENGGUNAKAN JASA KAMI
+{garis}
+"""
+    with open(path_nota, 'w') as f:
+        f.write(isi_nota)
+    
+    print(f"\n📄 Nota Digital dibuat: {path_nota}")
+    print(isi_nota)
+
+# 2. Update Fungsi menu_bisnis()
+# Di dalam bagian 'if pilih in ['1', '2']', setelah conn.commit():
+# Panggil fungsi buat_nota(nama, jasa, harga)
