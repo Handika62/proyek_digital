@@ -119,3 +119,43 @@ def main():
 
 if __name__ == "__main__":
     main()
+import urllib.parse  # Tambahkan ini di bagian paling atas
+
+# 1. Konfigurasi Nomor Pengurus/Teknisi
+NOMOR_TEKNISI_LISTRIK = "6281234567890" # Ganti dengan nomor asli (awali 62)
+NOMOR_PENGURUS_SAMPAH = "6281234567890"
+
+# 2. Fungsi untuk Generate Link WhatsApp
+def kirim_wa(nomor, pesan):
+    pesan_encoded = urllib.parse.quote(pesan)
+    link = f"https://wa.me/{nomor}?text={pesan_encoded}"
+    print("\n" + "="*30)
+    print("📲 NOTIFIKASI WHATSAPP SIAP")
+    print("="*30)
+    print(f"Silakan klik/buka link ini untuk lapor:\n{link}")
+    print("="*30)
+
+# 3. Update Fungsi Menu Listrik (Contoh)
+def menu_listrik():
+    print("\n--- ⚡ LAYANAN LISTRIK RW ---")
+    nama_cari = input("Masukkan Nama Warga: ")
+    nama_valid = validasi_warga(nama_cari)
+    
+    if nama_valid:
+        print("1. Pasang Baru\n2. Perbaikan Korsleting")
+        opsi = input("Pilih layanan: ")
+        tipe = "Pasang Baru" if opsi == '1' else "Perbaikan"
+        
+        # Simpan ke Database
+        conn = sqlite3.connect('data/layanan.db')
+        conn.execute("INSERT INTO listrik (warga, layanan, status) VALUES (?, ?, ?)", (nama_valid, tipe, "Menunggu"))
+        conn.commit()
+        
+        # Kirim Notifikasi WA
+        pesan_wa = f"Laporan Listrik RW Digital:\nNama: {nama_valid}\nLayanan: {tipe}\nStatus: Segera diproses."
+        kirim_wa(NOMOR_TEKNISI_LISTRIK, pesan_wa)
+        
+        print(f"✅ Data tersimpan & Link WA dibuat!")
+    else:
+        print("❌ Nama tidak ditemukan!")
+    input("\nTekan Enter...")
